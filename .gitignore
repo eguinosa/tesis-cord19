@@ -1,3 +1,13 @@
+
+# Data Files
+cord19_data/
+
+# System files
+.DS_Store
+
+# JetBrains Files
+.idea/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
