@@ -1,7 +1,7 @@
 # Gelin Eguinosa Rosique
 
 import csv
-import pickle
+import json
 from os.path import join, isfile, isdir
 from collections import defaultdict
 
@@ -21,7 +21,8 @@ class Papers:
 
     # Project Data Location
     project_data_folder = 'project_data'
-    papers_index_file = 'papers_index.pickle'
+    project_embed_folder = 'embedding_dicts'
+    papers_index_file = 'papers_index.json'
 
     def __init__(self):
         """
@@ -67,12 +68,12 @@ class Papers:
 
         # Save the Papers' Index
         papers_index_path = join(self.project_data_folder, self.papers_index_file)
-        with open(papers_index_path, 'wb') as file:
-            pickle.dump(self.papers_index, file)
+        with open(papers_index_path, 'w') as file:
+            json.dump(self.papers_index, file)
 
         # Load the Papers' Index
-        with open(papers_index_path, 'rb') as file:
-            self.papers_index = pickle.load(file)
+        with open(papers_index_path, 'r') as file:
+            self.papers_index = json.load(file)
 
     def paper_embedding(self, cord_uid):
         """
@@ -100,12 +101,6 @@ class Papers:
 
         # Raise an exception if we can't find the embedding for the 'cord_uid' Paper
         raise Exception("Paper not found in the list of embeddings.")
-
-    def create_embeddings_index(self):
-        """
-        Scan the csv embedding file, to load and save all the vectors of the
-        documents to access them more easily.
-        """
 
 
 # Testing the Papers class
