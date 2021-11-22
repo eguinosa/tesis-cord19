@@ -2,11 +2,13 @@
 
 import csv
 import json
+from os import mkdir
 from os.path import join, isfile, isdir
 from collections import defaultdict
 
 # To test the speed of the class
 from time_keeper import TimeKeeper
+
 
 class Papers:
     """
@@ -21,19 +23,61 @@ class Papers:
 
     # Project Data Location
     project_data_folder = 'project_data'
-    project_embed_folder = 'embedding_dicts'
+    project_embeds_folder = 'embedding_dicts'
     papers_index_file = 'papers_index.json'
+    embeds_index_file = 'embeddings_index.json'
 
     def __init__(self):
         """
-        Loads the metadata.csv to create the index and save the information of
-        interest.
+        Load the metadata.csv to create the index of all the papers available in
+        the current CORD-19 dataset and save all the information of interest.
+        
+        Also, load the cord_19_embeddings to create an index and save them in
+        100 different dictionaries, so they are quickly loaded without
+        occupying too much memory.
+        """
+        # Create a data folder if it doesn't exist.
+        if not isdir(self.project_data_folder):
+            mkdir(self.project_data_folder)
+        
+        # Form the papers index path.
+        papers_index_path = join(self.project_data_folder, self.papers_index_file)
+        # Check if the papers' index exists or not.
+        if isfile(papers_index_path):
+            # Load the Papers' Index.
+            with open(papers_index_path, 'r') as file:
+                self.papers_index = json.load(file)
+        else:         
+            # Create the index of the papers.
+            self.papers_index = self.create_papers_index()
+            # Save the Papers' Index
+            with open(papers_index_path, 'w') as file:
+                json.dump(self.papers_index, file)
+
+        # # Create the folder of the embedding dictionaries if it doesn't exist.
+        # proj_embeds_folder_path = join(self.project_data_folder, self.project_embeds_folder)
+        # if not isdir(proj_embeds_folder_path):
+        #     mkdir(proj_embeds_folder_path)
+        
+        # # Form the embeddings index path.
+        # embeds_index_path = join(self.project_data_folder, self.embeds_index_file)
+        # # Check if the embeddings' index exists or not.
+        # if isfile(embeds_index_path):
+        #     raise Exception()
+        # else:
+        #     raise Exception()        
+
+    @classmethod
+    def create_papers_index(cls):
+        """
+        Create an index of the papers available in the CORD-19 dataset specified
+        in the data folders of the class.
         """
         # Create the metadata path
-        metadata_path = join(self.cord19_data_folder, self.current_dataset, self.metadata_file)
+        metadata_path = join(cls.cord19_data_folder, cls.current_dataset, cls.metadata_file)
 
         # Dictionary where the information of the papers will be saved.
-        self.papers_index = defaultdict(dict)
+        papers_index = defaultdict(dict)
 
         # Open the metadata file
         with open(metadata_path) as file:
@@ -52,7 +96,7 @@ class Papers:
                 # Save all the information of the current paper, or update it
                 # if we have found this 'cord_uid' before. Also, check if the
                 # are not empty.
-                current_paper = self.papers_index[cord_uid]
+                current_paper = papers_index[cord_uid]
                 current_paper['cord_uid'] = cord_uid
                 current_paper['title'] = title
                 current_paper['abstract'] = abstract
@@ -63,17 +107,10 @@ class Papers:
                 if pmc_json_files != ['']:
                     current_paper['pmc_json_files'] = pmc_json_files
 
-        # Transform the papers' index from a defaultdict to a normal dictionary.
-        self.papers_index = dict(self.papers_index)
-
-        # Save the Papers' Index
-        papers_index_path = join(self.project_data_folder, self.papers_index_file)
-        with open(papers_index_path, 'w') as file:
-            json.dump(self.papers_index, file)
-
-        # Load the Papers' Index
-        with open(papers_index_path, 'r') as file:
-            self.papers_index = json.load(file)
+        # Transform the papers' index from a 'defaultdict' to a normal dictionary.
+        papers_index = dict(papers_index) 
+        return papers_index
+        
 
     def paper_embedding(self, cord_uid):
         """
