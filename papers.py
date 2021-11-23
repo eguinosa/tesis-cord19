@@ -6,7 +6,8 @@ from os import mkdir
 from os.path import join, isfile, isdir
 from collections import defaultdict
 
-# To test the speed of the class
+# To test the class
+from random import randint
 from time_keeper import TimeKeeper
 
 
@@ -199,6 +200,29 @@ class Papers:
         # Once we have saved all the embeddings, return the index.
         return embeddings_index
 
+    def paper_title_abstract(self, cord_uid):
+        """
+        Find the title and abstract of the CORD-19 paper specified by the
+        'cord_uid' identifier, and return them together as a string.
+        :param cord_uid: The Unique Identifier of the CORD-19 paper.
+        :return: A string containing the title and abstract of the paper.
+        """
+        # Get the dictionary with the info of the paper.
+        paper_dict = self.papers_index[cord_uid]
+        title_abstract = paper_dict['title'] + '\n\n' + paper_dict['abstract']
+        return title_abstract
+
+    # def paper_text(self, cord_uid):
+    #     """
+    #     Find the text of the 'cord_uid' paper in either the 'pmc_json_files' or
+    #     the 'pdf_json_files'.
+    #     :param cord_uid: The Unique Identifier of the CORD-19 paper.
+    #     :return: A string with the content of the paper, excluding the title and
+    #     abstract.
+    #     """
+    #     # Get the dictionary with the info of the paper
+    #     paper_dict = self.papers_index[cord_uid]
+
     def paper_embedding(self, cord_uid):
         """
         Find the precomputed SPECTER Document Embedding for the specified Paper
@@ -251,12 +275,22 @@ if __name__ == '__main__':
     num_papers = len(cord19_papers.papers_index)
     print(f"\nThe current CORD-19 dataset has {num_papers} documents.")
 
-    # Get the Embedding for one of the papers.
+    # Get the 'cord_uid' of one of the papers.
     cord19_uids = list(cord19_papers.papers_index.keys())
-    random_cord_uid = cord19_uids[100000]
-    print(f"\nGetting the Embedding for the Paper <{random_cord_uid}>...")
-    result = cord19_papers.paper_embedding(random_cord_uid)
-    print(f"The Embedding is:")
+    rand_i = randint(0, num_papers - 1)
+    rand_cord_uid = cord19_uids[rand_i]
+
+    # # Getting the embedding of one of the papers.
+    # print(f"\nGetting the Embedding for the Paper <{rand_cord_uid}>...")
+    # result = cord19_papers.paper_embedding(rand_cord_uid)
+    # print(f"The Embedding is:")
+    # print(result)
+
+    # Getting the title & abstract of one of the papers.
+    print(f"\nGetting the Title & Abstract of the Paper <{rand_cord_uid}>...")
+    result = cord19_papers.paper_title_abstract(rand_cord_uid)
+    print("Title & Abstract:\n")
     print(result)
-    print("Done.")
+
+    print("\nDone.")
     print(f"[{stopwatch.formatted_runtime()}]")
