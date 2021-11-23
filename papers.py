@@ -258,6 +258,17 @@ class Papers:
         # Return the found content.
         return body_text
 
+    def paper_full_text(self, cord_uid):
+        """
+        Get all the contents of the paper 'cord_uid', which includes the title,
+        abstract and the body text.
+        :param cord_uid: The Unique Identifier of the CORD-19 paper.
+        :return: A string containing the title, abstract and body text of the
+        paper.
+        """
+        full_text = self.paper_title_abstract(cord_uid) + '\n\n' + self.paper_content(cord_uid)
+        return full_text
+
     def paper_embedding(self, cord_uid):
         """
         Find the precomputed SPECTER Document Embedding for the specified Paper
@@ -327,11 +338,19 @@ if __name__ == '__main__':
     # print("Title & Abstract:\n")
     # print(result)
 
-    # Getting the text of one of the papers.
-    print(f"\nGetting the content of the Paper <{rand_cord_uid}>...")
-    result = cord19_papers.paper_content(rand_cord_uid)
+    # # Getting the text of one of the papers.
+    # print(f"\nGetting the content of the Paper <{rand_cord_uid}>...")
+    # result = cord19_papers.paper_content(rand_cord_uid)
+    # filename = 'output.txt'
+    # print(f"The content was printed to '{filename}'.")
+    # with open(filename, 'w') as f:
+    #     print(result, file=f)
+
+    # Getting the full text of one of the papers.
+    print(f"\nGetting the full text of the Paper <{rand_cord_uid}>...")
+    result = cord19_papers.paper_full_text(rand_cord_uid)
     filename = 'output.txt'
-    print(f"The content was printed to '{filename}'.")
+    print(f"The full text was printed to '{filename}'.")
     with open(filename, 'w') as f:
         print(result, file=f)
 
