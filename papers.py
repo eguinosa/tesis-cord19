@@ -138,7 +138,7 @@ class Papers:
         # Get the amount of CORD-19 papers in the current dataset.
         total_papers = len(self.papers_index)
         # Amount of embeddings to be stored per dictionary
-        embeds_per_dict = total_papers // 100 + 1
+        embeds_per_dict = total_papers // embed_dicts + 1
 
         # Index to store the papers' 'cord_uid' and the location of the dictionary
         # with their embedding.
@@ -288,6 +288,42 @@ class Papers:
                 self.cached_dict_filename = embed_dict_filename
         # Return the embedding using the cached dictionary.
         return self.cached_embed_dict[cord_uid]
+
+    def all_papers_title_abstract(self):
+        """
+        Create an iterator of strings containing the title and abstract of all
+        the papers in the CORD-19 dataset.
+        :return: An iterator of strings.
+        """
+        for cord_uid in self.papers_index:
+            yield self.paper_title_abstract(cord_uid)
+
+    def all_papers_content(self):
+        """
+        Create an iterator containing the body text for each of the papers in
+        the CORD-19 dataset.
+        :return: An iterator of strings.
+        """
+        for cord_uid in self.papers_index:
+            yield self.paper_content(cord_uid)
+
+    def all_papers_full_text(self):
+        """
+        Create an iterator containing the full text for each of the papers in
+        the CORD-19 dataset.
+        :return: An iterator of strings.
+        """
+        for cord_uid in self.papers_index:
+            yield self.paper_full_text(cord_uid)
+
+    def all_papers_embedding(self):
+        """
+        Create an iterator for the embeddings of all the papers available in the
+        CORD-19 dataset.
+        :return: An iterator of embeddings (each one an array of floats).
+        """
+        for cord_uid in self.papers_index:
+            yield self.paper_embedding(cord_uid)
 
 
 def _number_to_3digits(number):
