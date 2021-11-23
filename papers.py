@@ -212,16 +212,51 @@ class Papers:
         title_abstract = paper_dict['title'] + '\n\n' + paper_dict['abstract']
         return title_abstract
 
-    # def paper_text(self, cord_uid):
-    #     """
-    #     Find the text of the 'cord_uid' paper in either the 'pmc_json_files' or
-    #     the 'pdf_json_files'.
-    #     :param cord_uid: The Unique Identifier of the CORD-19 paper.
-    #     :return: A string with the content of the paper, excluding the title and
-    #     abstract.
-    #     """
-    #     # Get the dictionary with the info of the paper
-    #     paper_dict = self.papers_index[cord_uid]
+    def paper_content(self, cord_uid):
+        """
+        Find the text of the 'cord_uid' paper in either the 'pmc_json_files' or
+        the 'pdf_json_files'.
+        :param cord_uid: The Unique Identifier of the CORD-19 paper.
+        :return: A string with the content of the paper, excluding the title and
+        abstract.
+        """
+        # Get the dictionary with the info of the paper
+        paper_dict = self.papers_index[cord_uid]
+        # Get the paths for the documents of the paper
+        doc_json_files = []
+        if 'pmc_json_files' in paper_dict:
+            doc_json_files += paper_dict['pmc_json_files']
+        if 'pdf_json_files' in paper_dict:
+            doc_json_files += paper_dict['pdf_json_files']
+
+        # Where we are going to store the text of the paper.
+        body_text = ''
+        # Access the files and extract the text.
+        for doc_json_file in doc_json_files:
+            doc_json_path = join(self.cord19_data_folder, self.current_dataset, doc_json_file)
+            with open(doc_json_path, 'r') as f_json:
+                # Get the dictionary containing all the info of the document.
+                full_text_dict = json.load(f_json)
+
+                # Get all the sections in the body of the document.
+                last_section = ''
+                for paragraph_dict in full_text_dict['body_text']:
+                    section_name = paragraph_dict['section']
+                    paragraph_text = paragraph_dict['text']
+                    # Check if we are still on the same section, or a new one.
+                    if section_name == last_section:
+                        body_text += paragraph_text + '\n\n'
+                    else:
+                        body_text += '<< ' + section_name + ' >>\n' + paragraph_text + '\n\n'
+                    # Save the section name for the next iteration.
+                    last_section = section_name
+
+                # If we find text in one of the documents, break, to avoid
+                # repeating content.
+                if body_text:
+                    break
+        # Return the found content.
+        return body_text
 
     def paper_embedding(self, cord_uid):
         """
@@ -286,11 +321,19 @@ if __name__ == '__main__':
     # print(f"The Embedding is:")
     # print(result)
 
-    # Getting the title & abstract of one of the papers.
-    print(f"\nGetting the Title & Abstract of the Paper <{rand_cord_uid}>...")
-    result = cord19_papers.paper_title_abstract(rand_cord_uid)
-    print("Title & Abstract:\n")
-    print(result)
+    # # Getting the title & abstract of one of the papers.
+    # print(f"\nGetting the Title & Abstract of the Paper <{rand_cord_uid}>...")
+    # result = cord19_papers.paper_title_abstract(rand_cord_uid)
+    # print("Title & Abstract:\n")
+    # print(result)
+
+    # Getting the text of one of the papers.
+    print(f"\nGetting the content of the Paper <{rand_cord_uid}>...")
+    result = cord19_papers.paper_content(rand_cord_uid)
+    filename = 'output.txt'
+    print(f"The content was printed to '{filename}'.")
+    with open(filename, 'w') as f:
+        print(result, file=f)
 
     print("\nDone.")
     print(f"[{stopwatch.formatted_runtime()}]")
