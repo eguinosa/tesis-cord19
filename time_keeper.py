@@ -27,7 +27,7 @@ class TimeKeeper:
         again.
         """
         # Check if the TimeKeeper is currently running, otherwise we don't need
-        # to anything.
+        # to do anything.
         if self.current_state == 'running':
             # Update the total runtime of the program.
             self.runtime += time.time() - self.start_time
